@@ -1,0 +1,26 @@
+{
+  "id": "garden-clips",
+  "title": "A flower in two formats",
+  "project": "Community garden",
+  "created": "2026-11-15",
+  "what": "Visitors miss the seed exchange when they arrive at the garden. These invented samples help compare a clearer welcome.",
+  "why": "A clear welcome helps visitors find the seed exchange.",
+  "media": [
+    "media/flower.mp4",
+    "media/flower.webm"
+  ],
+  "question": "Which clip feels clearer?",
+  "options": [
+    "Use clip A",
+    "Use clip B",
+    "Try another clip"
+  ],
+  "evidence": [
+    "Invented demonstration content. No real review records."
+  ],
+  "context": [
+    "Compare the alternatives, then leave a choice or a note."
+  ],
+  "lane": "demo",
+  "recommendation": "Compare both alternatives before choosing."
+}
