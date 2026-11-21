@@ -32,16 +32,15 @@ The publisher checks media through the server's validator, refuses used identiti
 
 The phone needs HTTPS for the microphone and for the installable app. The simplest path is a private network you already trust.
 
-**Tailscale (recommended).** Install Tailscale on the computer and the phone. Then run:
+**Tailscale (recommended).** Install Tailscale on the computer and the phone and sign in to the same tailnet. Run this from the clone:
 
 ```sh
 export PANEL_TOKEN="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
 echo "$PANEL_TOKEN"            # paste this on the phone's login page once
-PANEL_SECURE_COOKIE=1 python3 server.py
-tailscale serve --bg 8080      # prints an https://<machine>.<tailnet>.ts.net address
+tailscale serve --bg 8080 && PANEL_SECURE_COOKIE=1 python3 server.py
 ```
 
-Open the printed address on the phone, enter the token, then use **Add to Home Screen**. The server still listens only on 127.0.0.1; Tailscale forwards to it.
+Send the token to the phone through a password manager or another private channel you already use, and never through a public or shared chat. Once the server is running, open the HTTPS address printed by Tailscale on the phone, enter the token, then use **Add to Home Screen**. The server still listens only on 127.0.0.1; Tailscale forwards to it. If you started the server with `--port`, use the same port number in the `tailscale serve` command.
 
 **Your own reverse proxy.** Any HTTPS proxy that keeps the original `Host` header works, for example Caddy with `reverse_proxy 127.0.0.1:8080`. Keep `PANEL_TOKEN` set and `PANEL_SECURE_COOKIE=1`. nginx rewrites the Host header by default. Add `proxy_set_header Host $http_host;` to the location block, or every answer is refused with 'Cross-origin write refused.'.
 
