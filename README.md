@@ -8,7 +8,7 @@ Each answer goes into an append-only log beside a retained copy of the card and 
 
 1. Clone it: `git clone https://github.com/Morkeeth/review-panel.git`. You need Python 3.10 or newer on macOS or Linux. There are no Python packages to install.
 2. Open a terminal in that folder: `cd review-panel`.
-3. Run `python3 server.py`. On the first launch it copies the invented garden examples into `data/queue` and `data/media`. If port 8080 is taken, add `--port 8090`.
+3. Run `python3 server.py`. On the first launch it copies the invented garden examples into `data/queue` and `data/media`. If port 8080 is taken, run `python3 server.py --port 8090` and open <http://127.0.0.1:8090> instead.
 4. Open <http://127.0.0.1:8080> in your browser. Compare the media, type a note, then tap an answer. For a phone, follow **Use it from your phone** below.
 5. Open **History**, or inspect `data/verdicts.jsonl`. The answer includes your note and the displayed card version. Its `snapshot` folder retains the card and attachments. Stop the server with Control-C.
 
@@ -32,20 +32,20 @@ The publisher checks media through the server's validator, refuses used identiti
 
 The phone needs HTTPS for the microphone and for the installable app. The simplest path is a private network you already trust.
 
-**Tailscale (recommended).** Install Tailscale on the computer and the phone. Then run:
+**Tailscale (recommended).** Install Tailscale on the computer and the phone and sign in to the same tailnet. Stop the local quickstart server first. Choose an unused local port and run this from the clone in a private terminal:
 
 ```sh
-export PANEL_TOKEN="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
-echo "$PANEL_TOKEN"            # paste this on the phone's login page once
-PANEL_SECURE_COOKIE=1 python3 server.py
-tailscale serve --bg 8080      # prints an https://<machine>.<tailnet>.ts.net address
+PANEL_TOKEN="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')" &&
+[ "${#PANEL_TOKEN}" -ge 24 ] &&
+export PANEL_TOKEN &&
+printf '%s\n' "$PANEL_TOKEN" &&
+tailscale serve --bg 8080 &&
+PANEL_SECURE_COOKIE=1 python3 server.py --port 8080
 ```
 
-Open the printed address on the phone, enter the token, then use **Add to Home Screen**. The server still listens only on 127.0.0.1; Tailscale forwards to it.
+Send the token to the phone through a password manager or another private channel you already use, and never through a public or shared chat. Once the server is running, open the HTTPS address printed by Tailscale on the phone, enter the token, then use **Add to Home Screen**. The server still listens only on 127.0.0.1; Tailscale forwards to it. To use a different port, replace both occurrences of `8080` in the block. When finished, stop the server with Control-C and run `tailscale serve --https=443 off` to remove the forwarding rule.
 
-**Your own reverse proxy.** Any HTTPS proxy that keeps the original `Host` header works, for example Caddy with `reverse_proxy 127.0.0.1:8080`. Keep `PANEL_TOKEN` set and `PANEL_SECURE_COOKIE=1`. nginx rewrites the Host header by default. Add `proxy_set_header Host $http_host;` to the location block, or every answer is refused with 'Cross-origin write refused.'.
-
-**Same Wi-Fi, no HTTPS.** `PANEL_TOKEN=... python3 server.py --host 0.0.0.0` and open `http://<computer-ip>:8080` on the phone. Cards, notes and answers work. The microphone and Home Screen install do not, because browsers require HTTPS for them.
+**Your own reverse proxy.** Start the loopback server with a long random `PANEL_TOKEN` and `PANEL_SECURE_COOKIE=1`, then forward with an HTTPS proxy that preserves the original `Host` header. For example, Caddy can use `reverse_proxy 127.0.0.1:8080`. With nginx, add `proxy_set_header Host $http_host;` to the location block so cross-origin protection can validate requests.
 
 ## Configuration and authentication
 
@@ -62,7 +62,7 @@ For another local dataset:
 PANEL_ROOT=./another-panel python3 server.py
 ```
 
-For access beyond the local machine, generate a long random token, put it in `PANEL_TOKEN`, and use `python3 server.py --host 0.0.0.0`. The server refuses a non-loopback bind without a token of at least 24 characters. Use an HTTPS reverse proxy and set `PANEL_SECURE_COOKIE=1`. The login page exchanges the token for an HttpOnly, SameSite cookie. Agent requests may use `Authorization: Bearer` with the token. Token authentication is the supported authentication method in this fork.
+For phone access, keep the server on loopback behind HTTPS and require a long random `PANEL_TOKEN`. Set `PANEL_SECURE_COOKIE=1` so the browser sends the login cookie only over HTTPS. The login page exchanges the token for an HttpOnly, SameSite cookie. Agent requests may use `Authorization: Bearer` with the token. Token authentication is the supported authentication method in this fork.
 
 Media, queue, history and audio routes all require authentication when a token is configured. Only explicitly attached files inside configured roots are served. The server does not browse arbitrary files. The PWA keeps the offline shell and logo; queue data and media always use the network.
 
