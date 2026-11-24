@@ -1,8 +1,15 @@
 # Review panel
 
-A self-hosted phone inbox for decisions from coding agents. It keeps the working panel's white ground, black rules, blue controls, one-card flow, swipeable media, A/B clip buttons, full-screen viewer, notes and voice outbox.
+When a coding agent stops to ask a question in a terminal you aren’t watching, Review Panel puts that question on your phone as one card so you can tap an answer and the agent can carry on.
 
-Each answer goes into an append-only log beside a retained copy of the card and its media. Agents publish a question, wait for the answer, then continue their work.
+<p>
+  <img src="docs/answer-a-card.gif" width="350" alt="Review Panel demo showing a garden sign card, a switch between sign options, a typed note, an answer and the saved decision in History.">
+  <img src="docs/phone-card.png" width="350" alt="A decision card on a phone-sized screen with a garden sign, answer buttons and a note field.">
+</p>
+
+- See the question, screenshots or clips, and choices together on one card.
+- Tap an answer and add a note with what to change.
+- Keep a history of the answer, the note and the exact card you saw.
 
 ## Setup in five steps
 
@@ -13,6 +20,17 @@ Each answer goes into an append-only log beside a retained copy of the card and 
 5. Open **History**, or inspect `data/verdicts.jsonl`. The answer includes your note and the displayed card version. Its `snapshot` folder retains the card and attachments. Stop the server with Control-C.
 
 The sample queue is seeded only when the queue directory does not exist. Restarting the server preserves answers. To start a separate demo, choose a new `PANEL_ROOT` directory.
+
+## Demo screenshots
+
+<details>
+<summary>See History on a phone-sized screen and the card on desktop</summary>
+
+<p><img src="docs/phone-history.png" width="350" alt="History on a phone-sized screen showing Use sign B and the saved note."></p>
+
+<p><img src="docs/desktop-card.png" width="900" alt="Desktop view with the garden sign on the left and the question, answer buttons and note on the right."></p>
+
+</details>
 
 ## Publish a card
 
@@ -79,6 +97,10 @@ Runtime data is ignored by Git. Back up the whole `PANEL_ROOT` folder, including
 `scripts/public_scan.py` is a leak scan and pre-push gate. It checks the tree, every commit message and patch, and attached binaries for home paths, key shapes and long numbers, plus the private words you list in a JSON file kept outside the repository. It prints counts only. Install it with `cp scripts/public_scan.py .git/hooks/pre-push`, then point it at your file with `git config publicscan.deny ~/somewhere/private.json`. Without that file the push is refused. See the top of the script for the file format.
 
 ## Coding agents
+
+The panel is self-hosted. Its one-card flow includes a media carousel, A/B clip buttons, a full-screen viewer, typed notes and a voice outbox. The interface uses a white background, black rules and blue controls.
+
+Each answer goes into an append-only log beside a retained copy of the card and its media.
 
 The same instructions work in Claude Code and Codex. Copy the snippet in [AGENT-SNIPPET.md](AGENT-SNIPPET.md) into your agent's project instructions. It describes publishing, waiting, and reading the verdict without asking the same question again in chat.
 
